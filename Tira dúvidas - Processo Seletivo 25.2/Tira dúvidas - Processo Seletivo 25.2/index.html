@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tira dúvidas | Processo Seletivo 25.2</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playwrite+NL+Guides&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="mobile">
+        <img src="images/logo.png" alt="image">
+    </header>
+    
+    <section class="container">
+        <aside class="desktop">
+            <div class="btns-duvidas" id="fixed-questions"></div>
+            <img src="images/logo.png" alt="image">
+        </aside>
+        <div class="duvidas">
+            <h1>Qual a sua dúvida?</h1>   
+
+            <div class="container-duvida">
+                <img src="images/pesquisa.png" alt="image">
+                <input type="text" id="user-question" placeholder="Dúvidas ?">
+                <button id="send-question">
+                    <img src="images/arrow.png" alt="image">
+                </button>
+            </div>
+
+            <div id="resposta"></div>
+
+            <div class="duvidas-frequentes" id="more-questions"></div>
+        </div>
+    </section>
+
+    <script>
+        let faqData = {};
+        const fixedQuestions = [
+            "Fundadores", 
+            "Processo Seletivo", 
+            "Cargos internos",
+            "Nossas soluções", 
+            "Cases ACEANOS", 
+        ];
+
+        async function loadFAQ() {
+            try {
+                const response = await fetch('knowledge_base.json');
+                const data = await response.json();
+                faqData = data.faq;
+                populateButtons();
+                loadAdditionalQuestions();
+            } catch (error) {
+                console.error("Erro ao carregar o JSON", error);
+            }
+        }
+
+        function populateButtons() {
+            const fixedQuestionsDiv = document.getElementById("fixed-questions");
+            fixedQuestionsDiv.innerHTML = "";
+            fixedQuestions.forEach(question => {
+                if (faqData[question]) {
+                    let button = document.createElement("button");
+                    button.innerText = question;
+                    button.onclick = () => showAnswer(question);
+                    fixedQuestionsDiv.appendChild(button);
+                }
+            });
+        }
+
+        function showAnswer(question) {
+            const respostaDiv = document.getElementById("resposta");
+            respostaDiv.innerHTML = "";
+            let answer = faqData[question] || "Desculpe, não encontramos uma resposta para essa pergunta.";
+            let i = 0;
+            function typeEffect() {
+                if (i < answer.length) {
+                    respostaDiv.innerHTML += answer.charAt(i);
+                    i++;
+                    setTimeout(typeEffect, 10);
+                }
+            }
+            typeEffect();
+        }
+
+        function loadAdditionalQuestions() {
+            const moreQuestionsDiv = document.getElementById("more-questions");
+            moreQuestionsDiv.innerHTML = "";
+            let additionalQuestions = Object.keys(faqData).filter(q => !fixedQuestions.includes(q));
+            
+            if (additionalQuestions.length > 6) {
+                additionalQuestions = additionalQuestions.sort(() => 0.5 - Math.random()).slice(0, 6);
+            }
+            
+            additionalQuestions.forEach(question => {
+                let button = document.createElement("button");
+                button.innerText = question;
+                button.onclick = () => showAnswer(question);
+                moreQuestionsDiv.appendChild(button);
+            });
+        }
+
+        window.onload = loadFAQ;
+    </script>
+</body>
+</html>
